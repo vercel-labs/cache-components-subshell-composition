@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Product, Promotion } from '@/app/products/data'
+import type { Product, Category, Promotion } from '@/app/products/data'
 import { getActivity } from '@/app/products/data'
 
 export async function InDemandBadge({
@@ -21,29 +21,71 @@ export async function InDemandBadge({
   )
 }
 
-export function List({ items }: { items: Product[] }) {
+export function List({
+  items,
+  categorySlug,
+  categoryMap,
+}: {
+  items: Product[]
+  categorySlug?: string
+  categoryMap?: Record<string, string>
+}) {
   return (
     <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-10">
-      {items.map((product) => (
+      {items.map((product) => {
+        const slug = categorySlug ?? categoryMap?.[product.category]
+        return (
+          <Link
+            key={product.id}
+            href={`/products/${slug}/${product.id}`}
+            className="group grid gap-2"
+          >
+            <div className="relative flex aspect-square items-center justify-center rounded-xl bg-gray-100 transition-colors group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+              <Image
+                src={product.image}
+                alt={product.name}
+                width={192}
+                height={192}
+                className="object-cover opacity-90 brightness-150 dark:brightness-100"
+              />
+              <Suspense>
+                <InDemandBadge id={product.id} />
+              </Suspense>
+            </div>
+            <h2 className="text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
+              {product.name}
+            </h2>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+export function CategoryNav({ categories }: { categories: Category[] }) {
+  return (
+    <nav className="flex gap-2">
+      {categories.map((category) => (
         <Link
-          key={product.id}
-          href={`/products/${product.id}`}
-          className="group grid gap-2"
+          key={category.id}
+          href={`/products/${category.slug}`}
+          className="rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          <div className="relative flex aspect-square items-center justify-center rounded-xl bg-gray-100 transition-colors group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
-            <Image
-              src={product.image}
-              alt={product.name}
-              width={192}
-              height={192}
-              className="object-cover opacity-90 brightness-150 dark:brightness-100"
-            />
-            <Suspense>
-              <InDemandBadge id={product.id} />
-            </Suspense>
-          </div>
-          <h2 className="text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">{product.name}</h2>
+          {category.name}
         </Link>
+      ))}
+    </nav>
+  )
+}
+
+export function ProductSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-10">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="grid gap-2">
+          <div className="aspect-square animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+          <div className="h-[1lh] w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        </div>
       ))}
     </div>
   )

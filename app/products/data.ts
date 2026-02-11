@@ -7,6 +7,12 @@ export type Product = {
   category: string
 }
 
+export type Category = {
+  id: string
+  name: string
+  slug: string
+}
+
 export async function getProducts(): Promise<Product[]> {
   'use cache'
   const response = await fetch('https://next-recipe-api.vercel.dev/products')
@@ -18,6 +24,35 @@ export async function getProduct(id: string): Promise<Product> {
   'use cache'
   const response = await fetch(
     `https://next-recipe-api.vercel.dev/products/${id}`
+  )
+
+  return response.json()
+}
+
+export async function getCategories(): Promise<Category[]> {
+  'use cache'
+  const response = await fetch('https://next-recipe-api.vercel.dev/categories')
+
+  return response.json()
+}
+
+export async function getCategory(
+  slug: string
+): Promise<Category & { products: Product[] }> {
+  'use cache'
+  const response = await fetch(
+    `https://next-recipe-api.vercel.dev/categories/${slug}`
+  )
+
+  return response.json()
+}
+
+export async function getProductsByCategory(
+  category: string
+): Promise<Product[]> {
+  'use cache'
+  const response = await fetch(
+    `https://next-recipe-api.vercel.dev/products?category=${category}`
   )
 
   return response.json()

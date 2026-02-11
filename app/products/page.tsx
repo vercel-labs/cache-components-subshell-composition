@@ -1,5 +1,5 @@
-import { List } from '@/app/products/ui'
-import { getProducts } from '@/app/products/data'
+import { CategoryNav, List } from '@/app/products/ui'
+import { getCategories, getProducts } from '@/app/products/data'
 
 // Static component
 function Header() {
@@ -12,8 +12,21 @@ function Header() {
 
 // Cache component
 async function ProductList() {
-  const products = await getProducts()
-  return <List items={products} />
+  const [categories, products] = await Promise.all([
+    getCategories(),
+    getProducts(),
+  ])
+
+  const categoryMap = Object.fromEntries(
+    categories.map((c) => [c.id, c.slug])
+  )
+
+  return (
+    <div className="grid gap-6">
+      <CategoryNav categories={categories} />
+      <List items={products} categoryMap={categoryMap} />
+    </div>
+  )
 }
 
 export default async function Page() {

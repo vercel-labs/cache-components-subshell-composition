@@ -13,7 +13,7 @@ async function PromotionContent() {
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
-    <html lang="en" className="antialiased dark:bg-gray-900">
+    <html lang="en" className="antialiased [scrollbar-gutter:stable] dark:bg-gray-900">
       <body>
         <main className="mx-auto grid max-w-2xl gap-12 px-5 py-8">
           <Suspense fallback={<PromotionSkeleton />}>
