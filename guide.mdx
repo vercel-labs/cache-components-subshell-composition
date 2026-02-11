@@ -1,0 +1,387 @@
+---
+title: Building variants of the same page
+description: Learn how to create many variants of the same page with route params, generateStaticParams, and Cache Components.
+nav_title: Page variants
+generate: true
+---
+
+# Todo
+
+- Mention no skeleton for conditional dynamic content
+
+When you create product pages, blog posts, user profiles, and any other kind of page that shares the same format, but display different data based on URL params, you're building variants of the same page.
+
+In this video, we'll go through how you can these types of pages in Next.js.
+
+## Example
+
+As an example, we'll build a product page that displays static product information like image and description, then add a dynamic component for the stock availability component that shows live inventory information.
+
+You can find all the resources used in this video in the description below:
+
+- Step-by-step guide
+- Demo
+- Code
+
+### Step 1: Create variants with route params
+
+Let's get started.
+
+Create a page component that accepts by wrapping the segment (folder) name in square brackets:
+
+```bash filename=output.txt
+app/products/[slug]/page.tsx
+```
+
+The value in the brackets is the route param. Next.js passes this value to the page component as a prop which you can then use to fetch the specific product data from your database.
+
+For example, if I were to run `next dev` and visit products/1, Next.js would pass 1 as the value of params to the page component and we can confirm this by console logging it.
+
+We can use the param prop to fetch product with id 1 from the database.
+
+```tsx filename=app/products/[slug]/page.tsx
+import db from '@/db'
+
+export default async function Page(props: PageProps) {
+  const { slug } = await props.params
+  const product = await db.product.findUnique({ where: { slug } })
+
+  return (
+    <>
+      <h1>Product</h1>
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <p>£{product.price}</p>
+    </>
+  )
+}
+```
+
+If `next dev` and navigate to /products/2, /products/3, and so on. You should see the different products are rendered for each URL.
+
+But, we'll also get a Next.js warning:
+
+```bash filename=output.txt
+Uncached data was accessed outside of <Suspense>
+```
+
+There are two things are causing this warning:
+
+1. The page access params at request-time, which can only be known at request-time.
+
+---
+
+title: Building variants of the same page
+description: Learn how to create many variants of the same page with route params, generateStaticParams, and Cache Components.
+nav_title: Page variants
+generate: true
+
+---
+
+Whenever you create product pages, blog posts, user profiles, and any other kind of page that shares the same format, but display different data based on URL params, you're building page variants.
+
+In this video, we'll go through how you can create variants of the same page in Next.js, prerender a subset of them ahead of time for very large websites, and add dynamic components to these pages without breaking prerendering.
+
+## Example
+
+As an example, we'll build a product page that displays static product information like image and description, prerender a subset of these pages at build time, then add a dynamic stock availability component that shows live inventory information for each product.
+
+You can find all the resources used in this video in the description below:
+
+- Step-by-step guide
+- Demo
+- Code
+
+### Step 1: Create variants with route params
+
+Let's get started.
+
+Create a page component that accepts by wrapping the segment (folder) name in square brackets:
+
+```bash filename=output.txt
+app/products/[slug]/page.tsx
+```
+
+The value in the brackets is the route param. Next.js passes this value to the page component as a prop which you can then use to fetch the specific product data from your database.
+
+For example, if I were to run `next dev` and visit products/1, Next.js would pass 1 as the value of params to the page component and we can confirm this by console logging it.
+
+We can use the param prop to fetch product with id 1 from the database.
+
+```tsx filename=app/products/[slug]/page.tsx
+import db from '@/db'
+
+export default async function Page(props: PageProps) {
+  const { slug } = await props.params
+  const product = await db.product.findUnique({ where: { slug } })
+
+  return (
+    <>
+      <h1>Product</h1>
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <p>£{product.price}</p>
+    </>
+  )
+}
+```
+
+If `next dev` and navigate to /products/2, /products/3, and so on. You should see the different products are rendered for each URL.
+
+### Why can't the page be prerendered?
+
+But, we'll also get a Next.js warning:
+
+```bash filename=output.txt
+Uncached data was accessed outside of <Suspense>
+```
+
+There are two things are causing this warning:
+
+1. The page access params at request-time, which can only be known at request-time.
+2. The page is rendering uncached data outside of a Suspense boundary.
+
+Both things will prevent the page from being prerendered at build time.
+
+Let's look at how we can fix each of these.
+
+### Step 2: Indicate which pages should be prerendered
+
+URL params can only be known at request-time, when a user visits the URL.
+
+You can supply a list of params for Next.js to know which routes to prerender ahead of time by using the generateStaticParams function. This is done by returning an array of objects, where each object has a key and value that matches the route param.
+
+```tsx filename=app/products/[slug]/page.tsx
+import db from '@/db'
+
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const products = await db.product.findMany({ select: { slug: true } })
+  return products.map((p) => ({ slug: p.slug }))
+}
+
+export default async function Page(props: PageProps) {
+  const { slug } = await props.params
+  const product = await db.product.findUnique({ where: { slug } })
+
+  if (!product) {
+    return <p>Not found</p>
+  }
+
+  return (
+    <>
+      <h1>Product</h1>
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <p>£{product.price}</p>
+    </>
+  )
+}
+```
+
+### Prerendering a subset of page variants
+
+You can return all your params and this will work well for small websites. But say you're working on a large website with pontentially thousands of items, prerendering all these product pages at build time would increase the time it takes to build andredeploy your app.
+
+It's also a waste of resources to cache page variants that not likely to be visited often.
+
+A common strategy is to prerender a subset of pages at build time, let's say, the 100 most popular products.
+
+```tsx filename=app/products/[slug]/page.tsx
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const products = await db.product.findMany({
+    select: { slug: true },
+    orderBy: { popularity: 'desc' },
+    take: 50,
+  })
+  return products.map((p) => ({ slug: p.slug }))
+}
+```
+
+For pages that are not on the list, Next.js will render the page at request time, for the first visitor, and the result can be cache in a CDN, so that future requests for the page are served from the cache. We call this on-demand generation.
+
+### Handling not found cases
+
+But what happens if the user visits a product that is not predefined and it's not in our database? Let's try product/abc.
+
+// confirm this
+
+Next.js will return a 404 error. And it's good practice to use notFound to handle this case, where you can create a custom UI to direct your users to the home page.
+
+### Step 3: Caching the page output
+
+The second thing we need to fix is our uncached data access. We can do this by adding a `use cache` directive to the product data fetching function.
+
+Now if we run `next dev` and visit product/1, we should see the warning has disappeared.
+
+And if we run `next build` and check the output, we can see the page is marked as static.
+
+```bash filename=output.txt
+Route (app)      Revalidate  Expire
+┌ ○ /products/[slug]           15m      1y
+└ ○ /_not-found
+
+○  (Static)  prerendered as static content
+```
+
+## Step 5: Add a dynamic stock availability component
+
+A product page often needs something user-specific, like live stock availability.
+
+- Add livestock component with uncached data access
+- But wait, shouldn't be a warning here?
+
+If we run `next build` and check the output, we can see the page is marked as static.
+
+### UI vs. data layer caching
+
+That's because adding `"use cache"` to the top of the file marks the entire file as cacheable, it's a strong default that you should only really use if you want to guarantee that the page should be prerendered.
+
+In our case, we want to prerender parts of the page, but still have some dynamic content.
+
+But personally, I prefer to move `'use cache'` from the UI layer to the data layer, this still means Next.js can prerender the page, but it makes it easier to audit `"use cache"` occurrences in the code.
+
+Now if we run `next dev` and visit product/1, we should see the warning again.
+
+In this case, we don't want to cache our live stock availability data, we'll wrap it in a Suspense boundary and provide a fallback.
+
+```tsx filename=app/products/[slug]/page.tsx
+import { Suspense } from 'react'
+import db from '@/db'
+import { getPromotionForUser } from '@/app/products/data'
+
+type PageProps = { params: Promise<{ slug: string }> }
+
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  const products = await db.product.findMany({
+    select: { slug: true },
+    orderBy: { popularity: 'desc' },
+    take: 50,
+  })
+  return products.map((p) => ({ slug: p.slug }))
+}
+
+async function getProduct(slug: string) {
+  'use cache'
+  return db.product.findUnique({ where: { slug } })
+}
+
+function PromotionSkeleton() {
+  return <div style={{ height: 48 }} />
+}
+
+async function Promotion() {
+  const promo = await getPromotionForUser()
+  return <div>{promo.message}</div>
+}
+
+export default async function Page(props: PageProps) {
+  const { slug } = await props.params
+  const product = await getProduct(slug)
+
+  if (!product) {
+    return <p>Not found</p>
+  }
+
+  return (
+    <>
+      <Suspense fallback={<PromotionSkeleton />}>
+        <Promotion />
+      </Suspense>
+      <h1>Product</h1>
+      <h2>{product.name}</h2>
+      <p>{product.description}</p>
+      <p>£{product.price}</p>
+    </>
+  )
+}
+```
+
+## Step 6: Advanced subshell composition
+
+Leverage parameter permutations to create reusable subshells:
+
+```tsx filename=app/products/[category]/[slug]/page.tsx
+// app/products/[category]/[slug]/page.tsx
+import { Suspense } from 'react'
+import { cacheLife, cacheTag } from 'next/cache'
+
+// Product details - uses both params
+async function ProductDetails({
+  category,
+  slug,
+}: {
+  category: string
+  slug: string
+}) {
+  'use cache'
+  cacheTag('products', `product-${slug}`)
+  cacheLife('hours')
+
+  const product = await db.products.findUnique({ where: { category, slug } })
+
+  return <ProductCard product={product} />
+}
+
+export default async function ProductPage({
+  params,
+}: {
+  params: Promise<{ category: string; slug: string }>
+}) {
+  const { category, slug } = await params
+
+  return <ProductDetails category={category} slug={slug} />
+}
+
+// Provide params to enable subshell generation
+export async function generateStaticParams() {
+  const products = await db.products.findMany({
+    select: { category: true, slug: true },
+    take: 100,
+  })
+  return products.map(({ category, slug }) => ({ category, slug }))
+}
+// app/products/[category]/layout.tsx
+import { Suspense } from 'react'
+import { cacheLife, cacheTag } from 'next/cache'
+
+// Category header - uses only category param
+async function CategoryHeader({ category }: { category: string }) {
+  'use cache'
+  cacheTag('categories', `category-${category}`)
+  cacheLife('days')
+
+  const cat = await db.categories.findUnique({ where: { slug: category } })
+  return (
+    <header>
+      <h1>{cat.name}</h1>
+      <p>{cat.description}</p>
+    </header>
+  )
+}
+
+export default async function CategoryLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode
+  params: Promise<{ category: string }>
+}) {
+  const { category } = await params
+
+  return (
+    <>
+      <CategoryHeader category={category} />
+      {/* Suspense enables subshell generation */}
+      <Suspense fallback={<ProductSkeleton />}>{children}</Suspense>
+    </>
+  )
+}
+```
+
+Result: When users navigate to /products/jackets/unknown-jacket:
+
+Category subshell (/products/jackets/[slug]) served instantly
+Product details stream in as they load
+Future visits to any jacket product reuse the category shell
+
+## Next steps

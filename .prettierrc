@@ -1,0 +1,8 @@
+{
+  "plugins": ["prettier-plugin-tailwindcss"],
+  "arrowParens": "always",
+  "semi": false,
+  "trailingComma": "all",
+  "singleQuote": true,
+  "objectWrap": "collapse"
+}
