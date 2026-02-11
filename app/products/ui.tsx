@@ -15,8 +15,10 @@ export async function InDemandBadge({
   if (!inDemand) return null
 
   return (
-    <div className="absolute bottom-2 left-2 truncate translate-y-0 rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-900 opacity-100 transition-all duration-300 starting:translate-y-1 starting:opacity-0 dark:bg-gray-700 dark:text-gray-100">
-      {verbose ? `In demand: sold ${sold} times in the last 12 hours` : 'In demand'}
+    <div className="absolute bottom-2 left-2 translate-y-0 truncate rounded-full bg-white px-2 py-1 text-xs font-medium text-gray-900 opacity-100 transition-all duration-300 dark:bg-gray-700 dark:text-gray-100 starting:translate-y-1 starting:opacity-0">
+      {verbose
+        ? `In demand: sold ${sold} times in the last 12 hours`
+        : 'In demand'}
     </div>
   )
 }
@@ -48,9 +50,9 @@ export function List({
                 height={192}
                 className="object-cover opacity-90 brightness-150 dark:brightness-100"
               />
-              <Suspense>
+              {/* <Suspense>
                 <InDemandBadge id={product.id} />
-              </Suspense>
+              </Suspense> */}
             </div>
             <h2 className="text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
               {product.name}
@@ -78,7 +80,7 @@ export function CategoryNav({ categories }: { categories: Category[] }) {
   )
 }
 
-export function ProductSkeleton() {
+export function ProductGridSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-10">
       {Array.from({ length: 3 }).map((_, i) => (
@@ -87,6 +89,19 @@ export function ProductSkeleton() {
           <div className="h-[1lh] w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
         </div>
       ))}
+    </div>
+  )
+}
+
+export function ProductSkeleton() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2 md:gap-10">
+      <div className="aspect-square animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
+      <div className="grid gap-2 md:content-start">
+        <div className="h-[1lh] w-32 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="h-[1lh] w-64 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="h-[1lh] w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+      </div>
     </div>
   )
 }

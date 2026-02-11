@@ -1,15 +1,9 @@
 import { Suspense } from 'react'
-import { cacheLife, cacheTag } from 'next/cache'
 import Link from 'next/link'
 import { getCategory } from '@/app/products/data'
 import { ProductSkeleton } from '@/app/products/ui'
 
-// Cache component — cached per category, reused across products in the same category
 async function CategoryHeader({ category }: { category: string }) {
-  'use cache'
-  cacheTag(`category-${category}`)
-  cacheLife('days')
-
   const cat = await getCategory(category)
 
   return (
