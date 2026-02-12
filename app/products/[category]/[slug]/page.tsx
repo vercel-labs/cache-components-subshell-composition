@@ -7,7 +7,9 @@ import { InDemandBadge } from '@/app/products/ui'
 export async function generateStaticParams() {
   const products = await getProducts()
 
-  return products.slice(0, 1).map((product) => ({ slug: product.id }))
+  return products
+    .slice(0, 1)
+    .map((p) => ({ category: p.category, slug: p.slug }))
 }
 
 // Cache component
@@ -27,7 +29,7 @@ async function ProductDetails({ slug }: { slug: string }) {
           className="object-cover opacity-90 brightness-150 dark:brightness-100"
         />
         <Suspense>
-          <InDemandBadge id={product.id} verbose />
+          <InDemandBadge slug={product.slug} verbose />
         </Suspense>
       </div>
       <div className="grid gap-2 md:content-start">

@@ -1,17 +1,17 @@
 import { Suspense } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import type { Product, Category, Promotion } from '@/app/products/data'
+import type { Product, Promotion } from '@/app/products/data'
 import { getActivity } from '@/app/products/data'
 
 export async function InDemandBadge({
-  id,
+  slug,
   verbose,
 }: {
-  id: string
+  slug: string
   verbose?: boolean
 }) {
-  const { sold, inDemand } = await getActivity(id)
+  const { sold, inDemand } = await getActivity(slug)
   if (!inDemand) return null
 
   return (
@@ -23,23 +23,14 @@ export async function InDemandBadge({
   )
 }
 
-export function List({
-  items,
-  categorySlug,
-  categoryMap,
-}: {
-  items: Product[]
-  categorySlug?: string
-  categoryMap?: Record<string, string>
-}) {
+export function List({ items }: { items: Product[] }) {
   return (
     <div className="grid grid-cols-2 gap-5 md:grid-cols-3 md:gap-10">
       {items.map((product) => {
-        const slug = categorySlug ?? categoryMap?.[product.category]
         return (
           <Link
             key={product.id}
-            href={`/products/${slug}/${product.id}`}
+            href={`/products/${product.category}/${product.slug}`}
             className="group grid gap-2"
             prefetch={false}
           >
@@ -52,7 +43,7 @@ export function List({
                 className="object-cover opacity-90 brightness-150 dark:brightness-100"
               />
               <Suspense>
-                <InDemandBadge id={product.id} />
+                <InDemandBadge slug={product.slug} />
               </Suspense>
             </div>
             <h2 className="text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
@@ -65,21 +56,6 @@ export function List({
   )
 }
 
-export function CategoryNav({ categories }: { categories: Category[] }) {
-  return (
-    <nav className="flex gap-2">
-      {categories.map((category) => (
-        <Link
-          key={category.id}
-          href={`/products/${category.slug}`}
-          className="rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-        >
-          {category.name}
-        </Link>
-      ))}
-    </nav>
-  )
-}
 
 export function ProductGridSkeleton() {
   return (
