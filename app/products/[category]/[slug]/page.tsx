@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getProduct, getCategories, getCategory } from '@/app/products/data'
+import { Suspense } from 'react'
+import { InDemandBadge } from '@/app/products/ui'
 
 export async function generateStaticParams() {
   // Generate a subset to prerender each category subshell.
@@ -35,6 +37,9 @@ async function ProductDetails({ slug }: { slug: string }) {
           height={384}
           className="object-cover opacity-90 brightness-150 dark:brightness-100"
         />
+        <Suspense>
+          <InDemandBadge id={product.id} verbose />
+        </Suspense>
       </div>
       <div className="grid gap-2 md:content-start">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
