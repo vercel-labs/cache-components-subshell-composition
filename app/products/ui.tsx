@@ -41,9 +41,9 @@ export function List({ items }: { items: Product[] }) {
                 height={192}
                 className="object-cover opacity-90 brightness-150 dark:brightness-100"
               />
-              <Suspense>
+              {/* <Suspense>
                 <InDemandBadge slug={product.slug} />
-              </Suspense>
+              </Suspense> */}
             </div>
             <h2 className="text-gray-500 transition-colors group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
               {product.name}

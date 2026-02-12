@@ -13,6 +13,7 @@ export async function generateStaticParams() {
 }
 
 async function ProductDetails({ slug }: { slug: string }) {
+  'use cache'
   const product = await getProduct(slug)
 
   if (!product) notFound()
@@ -27,9 +28,9 @@ async function ProductDetails({ slug }: { slug: string }) {
           height={384}
           className="object-cover opacity-90 brightness-150 dark:brightness-100"
         />
-        <Suspense>
+        {/* <Suspense>
           <InDemandBadge slug={product.slug} verbose />
-        </Suspense>
+        </Suspense> */}
       </div>
       <div className="grid gap-2 md:content-start">
         <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100">
@@ -49,6 +50,7 @@ async function ProductDetails({ slug }: { slug: string }) {
 export default async function Page({
   params,
 }: PageProps<'/products/[category]/[slug]'>) {
+  'use cache'
   const { slug } = await params
 
   return <ProductDetails slug={slug} />
