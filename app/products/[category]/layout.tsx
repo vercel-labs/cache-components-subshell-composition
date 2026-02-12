@@ -4,6 +4,7 @@ import { getCategory } from '@/app/products/data'
 import { ProductSkeleton } from '@/app/products/ui'
 
 async function CategoryHeader({ category }: { category: string }) {
+  'use cache'
   const cat = await getCategory(category)
 
   return (

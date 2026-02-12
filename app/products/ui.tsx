@@ -86,7 +86,7 @@ export function ProductGridSkeleton() {
       {Array.from({ length: 3 }).map((_, i) => (
         <div key={i} className="grid gap-2">
           <div className="aspect-square animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
-          <div className="h-[1lh] w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+          <div className="h-lh w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
         </div>
       ))}
     </div>
@@ -98,9 +98,9 @@ export function ProductSkeleton() {
     <div className="grid gap-6 md:grid-cols-2 md:gap-10">
       <div className="aspect-square animate-pulse rounded-xl bg-gray-100 dark:bg-gray-800" />
       <div className="grid gap-2 md:content-start">
-        <div className="h-[1lh] w-32 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
-        <div className="h-[1lh] w-64 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
-        <div className="h-[1lh] w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="h-lh w-32 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="h-lh w-64 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="h-lh w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
       </div>
     </div>
   )

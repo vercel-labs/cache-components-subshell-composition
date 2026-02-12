@@ -1,21 +1,27 @@
-import { Suspense } from 'react'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getProduct } from '@/app/products/data'
-import { InDemandBadge } from '@/app/products/ui'
+import { getProduct, getCategories, getCategory } from '@/app/products/data'
 
 export async function generateStaticParams() {
-  // Only generate 1 product to test subshell composition —
-  // other products will reuse the cached category shell at request time
-  return [{ category: 'tops', slug: '1' }]
+  // Generate a subset to prerender each category subshell.
+  // Remaining products are dynamic — they reuse the cached category shell
+  // and stream in the product details, demonstrating subshell composition.
+  const categories = await getCategories()
+  const params: { category: string; slug: string }[] = []
+
+  for (const cat of categories) {
+    const data = await getCategory(cat.slug)
+    for (const product of data.products.slice(0, 1)) {
+      params.push({ category: cat.slug, slug: product.id })
+    }
+  }
+
+  return params
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ category: string; slug: string }>
-}) {
-  const { slug } = await params
+// Cache component
+async function ProductDetails({ slug }: { slug: string }) {
+  'use cache'
   const product = await getProduct(slug)
 
   if (!product) notFound()
@@ -30,9 +36,6 @@ export default async function Page({
           height={384}
           className="object-cover opacity-90 brightness-150 dark:brightness-100"
         />
-        {/* <Suspense>
-          <InDemandBadge id={slug} verbose />
-        </Suspense> */}
       </div>
       <div className="grid gap-2 md:content-start">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -47,4 +50,14 @@ export default async function Page({
       </div>
     </div>
   )
+}
+
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ category: string; slug: string }>
+}) {
+  const { slug } = await params
+
+  return <ProductDetails slug={slug} />
 }
