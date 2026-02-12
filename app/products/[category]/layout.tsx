@@ -26,10 +26,7 @@ async function CategoryHeader({ category }: { category: string }) {
 export default async function CategoryLayout({
   children,
   params,
-}: {
-  children: React.ReactNode
-  params: Promise<{ category: string }>
-}) {
+}: LayoutProps<'/products/[category]'>) {
   const { category } = await params
 
   return (

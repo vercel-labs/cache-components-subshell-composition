@@ -12,7 +12,6 @@ export async function generateStaticParams() {
     .map((p) => ({ category: p.category, slug: p.slug }))
 }
 
-// Cache component
 async function ProductDetails({ slug }: { slug: string }) {
   const product = await getProduct(slug)
 
@@ -33,7 +32,7 @@ async function ProductDetails({ slug }: { slug: string }) {
         </Suspense>
       </div>
       <div className="grid gap-2 md:content-start">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+        <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100">
           {product.name}
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -49,9 +48,7 @@ async function ProductDetails({ slug }: { slug: string }) {
 
 export default async function Page({
   params,
-}: {
-  params: Promise<{ category: string; slug: string }>
-}) {
+}: PageProps<'/products/[category]/[slug]'>) {
   const { slug } = await params
 
   return <ProductDetails slug={slug} />
