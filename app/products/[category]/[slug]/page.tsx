@@ -1,24 +1,13 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getProduct, getCategories, getCategory } from '@/app/products/data'
+import { getProduct, getProducts } from '@/app/products/data'
 import { Suspense } from 'react'
 import { InDemandBadge } from '@/app/products/ui'
 
 export async function generateStaticParams() {
-  // Generate a subset to prerender each category subshell.
-  // Remaining products are dynamic — they reuse the cached category shell
-  // and stream in the product details, demonstrating subshell composition.
-  const categories = await getCategories()
-  const params: { category: string; slug: string }[] = []
+  const products = await getProducts()
 
-  for (const cat of categories) {
-    const data = await getCategory(cat.slug)
-    for (const product of data.products.slice(0, 1)) {
-      params.push({ category: cat.slug, slug: product.id })
-    }
-  }
-
-  return params
+  return products.slice(0, 1).map((product) => ({ slug: product.id }))
 }
 
 // Cache component
