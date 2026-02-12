@@ -35,7 +35,7 @@ export default async function CategoryLayout({
   return (
     <>
       <CategoryHeader category={category} />
-      <Suspense fallback={<ProductSkeleton />}>{children}</Suspense>
+      {children}
     </>
   )
 }

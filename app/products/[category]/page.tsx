@@ -4,7 +4,9 @@ import { getCategories, getProductsByCategory } from '@/app/products/data'
 export async function generateStaticParams() {
   const categories = await getCategories()
 
-  return categories.map((c) => ({ category: c.slug }))
+  return categories
+    .filter((c) => c.slug === 'tops')
+    .map((c) => ({ category: c.slug }))
 }
 
 export default async function Page({
