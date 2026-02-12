@@ -21,7 +21,6 @@ export async function generateStaticParams() {
 
 // Cache component
 async function ProductDetails({ slug }: { slug: string }) {
-  'use cache'
   const product = await getProduct(slug)
 
   if (!product) notFound()
